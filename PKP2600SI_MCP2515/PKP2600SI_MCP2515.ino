@@ -8,7 +8,7 @@
 #include "PKP2600SI_CANOPEN.h"
 
 #define CS_PIN 10
-#define INTERRUPT_PIN 2
+#define INTERRUPT_PIN 3
 #define KEYPAD_BASE_ID 0x15
 #define ENABLE_PASSCODE true
 
@@ -65,8 +65,30 @@ void setup() {
 
 //----------------------------------------------------------------------------
 
+unsigned long currentMillis;
+unsigned long key9OnTime = 0;
+bool lastKey9State;
+
 void loop() {
+    currentMillis = millis();
+  
    keypad.process(); //must have this in main loop.  
+
+   if(keypad.buttonState[PKP_KEY_1] == 1){
+      //do stuff
+   }
+
+   //if key 9 is pressed, turn off after 2 seconds
+   if(keypad.buttonState[PKP_KEY_9] == 1 && lastKey9State == 0){
+    key9OnTime = currentMillis;
+   }
+   lastKey9State = keypad.buttonState[PKP_KEY_9];
+   if(lastKey9State==1 && (currentMillis-key9OnTime)>2000){
+    keypad.buttonState[PKP_KEY_9]=0;
+    keypad.keypadWriteColor();
+   }
+   
+
   
 
 }

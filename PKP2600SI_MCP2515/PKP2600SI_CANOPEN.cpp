@@ -59,10 +59,6 @@ void CANKeypad::begin(CAN_SPEED CANSpeed, CAN_CLOCK mcpClockSpeed)
   //_PKP_MCP.setFilter(MCP2515::RXF4, false, 0x7FF);
   //_PKP_MCP.setFilter(MCP2515::RXF5, false, 0x7FF);
 
-  _PKP_MCP.setBitrate(CANSpeed, mcpClockSpeed);
-  _PKP_MCP.setNormalMode();
-
-
   // ------ setting up keypad password -------
   if(!_passwordEnable){
     _keypadUnlocked=true;
@@ -70,23 +66,32 @@ void CANKeypad::begin(CAN_SPEED CANSpeed, CAN_CLOCK mcpClockSpeed)
   else _keypadUnlocked=false;
 
   //Set up interrupts
+  pinMode(interruptPin, INPUT);
   attachInterrupt(digitalPinToInterrupt(interruptPin), mcpInterruptCallback, FALLING);
   Timer1.initialize(400000); //Set Timer1 to trigger interrupt every 320ms
   Timer1.attachInterrupt(timerOneInterruptCallback); 
+
+  _PKP_MCP.setBitrate(CANSpeed, mcpClockSpeed);
+  _PKP_MCP.setNormalMode();
+  _PKP_MCP.sendMessage(&_startCANopenNodeMsg); //Not really needed since the keypad is set to be active on startup, but when uploading arduino code the MCP sends a bunch of 0s over CAN which stops the keypad CANopen node.
 }
 
 void CANKeypad::process()
 {
-  _currentMillis=millis();
-  if(!_mcp_interrupt && !digitalRead(interruptPin)){ //sometimes 2 interrupts are generated too quickly for the arduino to pick up on and the falling interrupt type won't pick up on it. This is a bandaid.
-    _mcp_interrupt=true;
+   _currentMillis=millis();
+   if(!_mcp_interrupt && !digitalRead(interruptPin) && (_currentMillis - _lastInterruptTime)>450){ //Periodically in case an interrupt is missed for some reason
+     _mcp_interrupt=true;
    }
    if(_mcp_interrupt){
+    _lastInterruptTime=_currentMillis;
+    //_libSerial->println("Interrupt Received");
     _mcp_interrupt = false;
     uint8_t irq = _PKP_MCP.getInterrupts();
     if(irq & (MCP2515::CANINTF_RX0IF | MCP2515::CANINTF_RX1IF)){ //if the interrupt came from one of the receive buffers, do the following
       //_libSerial->println("Interrupt came from receive buffer");
-      if (_PKP_MCP.readMessage(&rcvMsg) == MCP2515::ERROR_OK) {      
+      if (_PKP_MCP.readMessage(&rcvMsg) == MCP2515::ERROR_OK) {  
+        //_libSerial->print("CAN ID: ");
+        //_libSerial->println(rcvMsg.can_id);    
         if(rcvMsg.can_id == (0x180 + keypadCANID)){
           _lastKeyReceiveMillis = _currentMillis;
           if(_keypadUnlocked){
@@ -185,6 +190,17 @@ void CANKeypad::setupMessages()
   _keyBlinkMsg.data[5] = 0x00;
   _keyBlinkMsg.data[6] = 0x00;
   _keyBlinkMsg.data[7] = 0x00;
+
+  _startCANopenNodeMsg.can_id  = 0x000;
+  _startCANopenNodeMsg.can_dlc = 8;
+  _startCANopenNodeMsg.data[0] = 0x01;
+  _startCANopenNodeMsg.data[1] = keypadCANID;
+  _startCANopenNodeMsg.data[2] = 0x00;
+  _startCANopenNodeMsg.data[3] = 0x00;
+  _startCANopenNodeMsg.data[4] = 0x00;
+  _startCANopenNodeMsg.data[5] = 0x00;
+  _startCANopenNodeMsg.data[6] = 0x00;
+  _startCANopenNodeMsg.data[7] = 0x00;
 
 }
 

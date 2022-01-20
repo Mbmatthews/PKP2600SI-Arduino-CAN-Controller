@@ -96,6 +96,7 @@ class CANKeypad
     struct can_frame _keyBrightnessMsg;
     struct can_frame _keyBlinkMsg;
     struct can_frame _keypadMasterStatusMsg;
+    struct can_frame _startCANopenNodeMsg;
     bool _buttonPresses[12];
     bool _lastButtonPresses[12];
     uint8_t _buttonMode[12] = {BUTTON_MODE_MOMENTARY,BUTTON_MODE_MOMENTARY,BUTTON_MODE_MOMENTARY,BUTTON_MODE_MOMENTARY,BUTTON_MODE_MOMENTARY,BUTTON_MODE_MOMENTARY,
@@ -104,6 +105,7 @@ class CANKeypad
     bool _currentBlinks[12][3]  = { {0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0} };
     bool _keypadUnlocked = false;
     unsigned long _currentMillis=0;
+    unsigned long _lastInterruptTime = 0;
     unsigned long _lastKeyReceiveMillis=0; //used for checking the periodic receipt of keys message.  If there isn't any messages for some time it will fault out.
     bool _lastMatch;
     unsigned long _startTime;
