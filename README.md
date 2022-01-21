@@ -10,11 +10,11 @@ This library depends on the following libraries:
 - TimerOne
 
 ## Instructions
-Update your keypad to the REV1.5 software.  Blink Marine's programming tool and instructions are included here.  Note that this requires the use of a KVaser or PCAN tool, or some emulator (CANable with PCAN  emulator software for example).
+Update your keypad to the REV1.5 software.  Blink Marine\'s programming tool and instructions are included here.  Note that this requires the use of a KVaser or PCAN tool, or some emulator (CANable with PCAN  emulator software for example).
 
 Wire your arduino to the MCP2515 module.  Make sure to use the INT pin from the MCP2515 and make sure that this goes to an Arduino pin that is capable of processing interrupts.
 
-Connect your CAN keypad to the MCP can network and power up the keypad using a power supply (12-24V DC), and make sure you have your 2 120$\Omega$ resistors in place on each end of the CAN bus.  Upload the sketch named "PKP2600SI_Configure.ino" to program the keypad to the desired message format, baudrate, etc.  Then upload the sketch named "PKP2600SI_MCP2515.ino" and watch the keyboard work.  In this sketch you can clearly see how to set up the various key modes, and their colors for each state.  The library uses TimerOne for periodic message transmission, but all other timer functions are left up to the end user to implement in the main loop like the provided sketch does with button 9.
+Connect your CAN keypad to the MCP can network and power up the keypad using a power supply (12-24V DC), and make sure you have your 2 120Ω resistors in place on each end of the CAN bus.  Upload the sketch named "PKP2600SI_Configure.ino" to program the keypad to the desired message format, baudrate, etc.  Then upload the sketch named "PKP2600SI_MCP2515.ino" and watch the keyboard work.  In this sketch you can clearly see how to set up the various key modes, and their colors for each state.  The library uses TimerOne for periodic message transmission, but all other timer functions are left up to the end user to implement in the main loop like the provided sketch does with button 9.
 
 ## Library Commands
 Here is a list of all the pertinent library commands, although most of this can be gathered by looking at the example sketch.
@@ -44,14 +44,14 @@ CAN_CLOCK is the clock speed of your MCP2515 oscillator.  Most are 8 or 16MHz an
 ```cpp
 void setSerial(Stream *serialReference);
 ```
-Mostly used for troubleshooting, and can be very useful if you are modifying this library to do things it wasn't designed to do originally.  Declare a serial object in your setup() and use this command to pass in the serial object to the library for internal use.  Using this looks something like:
+Mostly used for troubleshooting, and can be very useful if you are modifying this library to do things it wasn\'t designed to do originally.  Declare a serial object in your setup() and use this command to pass in the serial object to the library for internal use.  Using this looks something like:
 ```cpp
 Serial.begin(115200);
 keypad.setSerial(&Serial);
 ```
 
 ### void process();
-This is the library function that does all of the actual processing of the keypad messages and updates button states, etc.  This should be placed in your main loop.  **CAUTION:** If you want the arduino to process keypad messages in a relatively quick pace, don't ever use delays in your program, and don't spend too much time in another section of the main loop, else you will experience laggy processing.
+This is the library function that does all of the actual processing of the keypad messages and updates button states, etc.  This should be placed in your main loop.  **CAUTION:** If you want the arduino to process keypad messages in a relatively quick pace, don't ever use delays in your program, and don\'t spend too much time in another section of the main loop, else you will experience laggy processing.
 
 ### Set Password
 ```cpp
@@ -104,6 +104,58 @@ Both the colors and blinkColors array and 4 wide arrays of colors for each respe
 For momentary and latching switches, state=0 is off, state=1 is on.  Your array should specify colors for both states 0 and 1, the other 2 entries of the array can be made to be no color.
 For 3-state and 4-state switches, you can use the other slots in these arrays. The blink array works similarly but is what you should use if you want a key to flash on in off while in that state.
 
+As an example,
+```cpp
+uint8_t exampleColors[4] = {PKP_KEY_BLANK,PKP_KEY_RED,PKP_KEY_BLANK,PKP_KEY_BLANK};
+uint8_t exampleBlinks[4] = {PKP_KEY_BLANK,PKP_KEY_BLANK,PKP_KEY_BLUE,PKP_KEY_BLANK};
+keypad.setKeyColor(PKP_KEY_5, colors1, blinks1);
+```
+In the above code, the key will be off in state 0, red in state 1, and flashing blue in state 2.
 
+For your color options, there are:
+- PKP_KEY_BLANK
+- PKP_KEY_RED
+- PKP_KEY_GREEN
+- PKP_KEY_BLUE
+- PKP_KEY_YELLOW
+- PKP_KEY_CYAN
+- PKP_KEY_MAGENTA
+- PKP_KEY_WHITE
 
+### Set Key Modes
+```cpp
+void setKeyMode(uint8_t keyNumber, uint8_t keyMode);
+```
+This command sets the key mode.  Use the same key number definitions from above and the key mode options are then:
+- BUTTON_MODE_MOMENTARY
+- BUTTON_MODE_TOGGLE
+- BUTTON_MODE_CYCLE3
 
+### Set Default Button States
+```cpp
+void setDefaultButtonStates(uint8_t defaultStates[12]);
+```
+This function sets the default state of each button.  For example, if you have a toggle switch that you want to be on when the keypad boots, you would set its default state to 1. This function expects a 12-wide array of values, in which you should specify the default states of all 12 keys at once.
+
+### Write Colors & Write Blink Colors
+```cpp
+void keypadWriteColor();
+void keypadWriteBlink();
+```
+These functions shouldn\'t be called from outside the library if you are letting the library control the keypad completely.  The use for these functions is if you write to a keystate using the **buttonState[12]** array and want the library to update the color of the keypad immediately.
+
+## Publicly Accessible Variables and their uses
+These variables are accessible from the main loop and can be used by the user to manipulate the library into doing more customized things like auto-resetting buttons from timers, turning off a button from some other message on the CAN bus, etc.
+
+### Button State Array
+```cpp
+uint8_t buttonState[12];
+```
+This array is readable and writeable so you can do things in the main loop based on the button states, or write button states based on things in the main loop.
+
+### Interrupt flag and Received CAN Message
+```cpp
+bool interruptAvailable = false;
+struct can_frame rcvMsg;
+```
+After the library receives an interrupt, if the message is not pertinent to the keypad control, it will pass the message to this object and set the **interruptAvailable** flag true.  In the main loop, you could check for the interrupt flag and then process the message however you would like.  **Note:** in order for this to work you\'ll need to configure the filters of the MCP to accept whatever message you are looking for.  MASKS 0 and 1 are already set by the library and FILTERs 0 and 2 are also used by the library, so use the other filters of the MCP to accomplish what you want.
