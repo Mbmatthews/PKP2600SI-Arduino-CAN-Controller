@@ -1,3 +1,4 @@
+![PKPMCPDuino](https://user-images.githubusercontent.com/97353663/150457832-7910e48d-2751-44b8-acff-df88ec356e42.png)
 # Arduino-based CAN controller for Blink Marine PKP-2600-SI
 This project is a small library used to control a PKP-2600-SI CAN Keypad with an MCP2515. It is structured to be interupt-driven so that the user can do other things in the main loop while the keypad logic is handled in the background.  Messages are sent and received periodically and checked by the library to ensure continuous keypad connectivity.  
 
