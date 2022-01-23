@@ -54,6 +54,7 @@
 #define BUTTON_MODE_MOMENTARY 1
 #define BUTTON_MODE_TOGGLE    2
 #define BUTTON_MODE_CYCLE3    3
+#define BUTTON_MODE_CYCLE4    4
 
 volatile static bool _mcp_interrupt = false;
 volatile static bool _periodicSentFlag=false;
@@ -64,7 +65,7 @@ class CANKeypad
   public:
     // ------ Public Variables ------
     uint8_t keypadCANID = 0x15;
-    byte interruptPin = 2;
+    byte interruptPin = 3;
     uint8_t buttonState[12];
     uint8_t currentBrightness;
     bool interruptAvailable = false;

@@ -224,6 +224,10 @@ void CANKeypad::decodeKeys(struct can_frame canMsg){
             if(buttonState[i] <2) buttonState[i]++;
             else buttonState[i]=0;
           }
+          else if(_buttonMode[i]==BUTTON_MODE_CYCLE4 && _buttonPresses[i]==true){
+            if(buttonState[i] <3) buttonState[i]++;
+            else buttonState[i]=0;
+          }
           keypadWriteColor();
           keypadWriteBlink();
           sendKeysStatus();
@@ -370,12 +374,23 @@ void CANKeypad::keypadWriteBlink(){
   }
 
   //setting up current Blink colors array
-  for(int m=0; m<4;m++){
-    for(int k=0; k<12;k++){
+  for(int m=0; m<4;m++){ //loop through the colors array
+    for(int k=0; k<12;k++){ //loop through the keys array
       if(buttonState[k]==m){
         _currentBlinks[k][0]=(_keysBlinkColor[m][k]>>2) & 0b1; //RED bit
         _currentBlinks[k][1]=(_keysBlinkColor[m][k]>>1) & 0b1; //GREEN bit
         _currentBlinks[k][2]=(_keysBlinkColor[m][k]) & 0b1; //BLUE bit
+      }
+    }
+  }
+
+  //XOR each blink color with each base color. 
+  for(int m=0; m<4;m++){ //loop through the colors array
+    for(int k=0; k<12;k++){ //loop through the keys array
+      if(buttonState[k]==m){
+        _currentBlinks[k][0]= _currentBlinks[k][0] ^ _currentColors[k][0]; //RED bit
+        _currentBlinks[k][1]= _currentBlinks[k][0] ^ _currentColors[k][0]; //GREEN bit
+        _currentBlinks[k][2]= _currentBlinks[k][0] ^ _currentColors[k][0]; //BLUE bit
       }
     }
   }
