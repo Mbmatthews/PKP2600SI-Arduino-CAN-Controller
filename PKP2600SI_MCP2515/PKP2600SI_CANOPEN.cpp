@@ -384,17 +384,6 @@ void CANKeypad::keypadWriteBlink(){
     }
   }
 
-  //XOR each blink color with each base color. 
-  for(int m=0; m<4;m++){ //loop through the colors array
-    for(int k=0; k<12;k++){ //loop through the keys array
-      if(buttonState[k]==m){
-        _currentBlinks[k][0]= _currentBlinks[k][0] ^ _currentColors[k][0]; //RED bit
-        _currentBlinks[k][1]= _currentBlinks[k][0] ^ _currentColors[k][0]; //GREEN bit
-        _currentBlinks[k][2]= _currentBlinks[k][0] ^ _currentColors[k][0]; //BLUE bit
-      }
-    }
-  }
-
   //Reorganizing colors array into proper byte format for the keypad can message
   //BYTE 0 (R8 R7 R6 R5 - R4 R3 R2 R1)
   for(int i=8;i>0;i--){

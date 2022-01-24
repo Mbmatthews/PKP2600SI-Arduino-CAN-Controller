@@ -39,8 +39,9 @@ void setup() {
   keypad.setKeyColor(PKP_KEY_8, colors1, blinks1);
   keypad.setKeyColor(PKP_KEY_9, colors1, blinks1);
   keypad.setKeyColor(PKP_KEY_10, colors1, blinks1);
-  colors1[1] = PKP_KEY_WHITE;
-  colors1[2] = PKP_KEY_BLUE;
+  colors1[1] = PKP_KEY_RED;
+  colors1[2] = PKP_KEY_GREEN;
+  colors1[3] = PKP_KEY_BLUE;  
   keypad.setKeyColor(PKP_KEY_11, colors1, blinks1);
   keypad.setKeyColor(PKP_KEY_12, colors1, blinks1);
 
@@ -55,7 +56,7 @@ void setup() {
   keypad.setKeyMode(PKP_KEY_9, BUTTON_MODE_TOGGLE);
   keypad.setKeyMode(PKP_KEY_10, BUTTON_MODE_TOGGLE);
   keypad.setKeyMode(PKP_KEY_11, BUTTON_MODE_CYCLE3);
-  keypad.setKeyMode(PKP_KEY_12, BUTTON_MODE_CYCLE3);
+  keypad.setKeyMode(PKP_KEY_12, BUTTON_MODE_CYCLE4);
 
   uint8_t defaultStates[12] = {0,0,0,0,0,0,1,1,0,0,1,2};
   keypad.setDefaultButtonStates(defaultStates);
