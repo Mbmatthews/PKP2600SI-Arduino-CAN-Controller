@@ -82,9 +82,7 @@ class CANKeypad
     void setKeyColor(uint8_t keyNumber, uint8_t colors[4], uint8_t blinkColors[4]);
     void setKeyMode(uint8_t keyNumber, uint8_t keyMode);
     void setDefaultButtonStates(uint8_t defaultStates[12]);
-    void keypadWriteColor();
-    void keypadWriteBlink();
-    
+    void updateKeypad();    
 
 
     
@@ -131,6 +129,8 @@ class CANKeypad
     void sendKeysStatus();
     void periodicSend();
     void checkForKeypad();
+    void keypadWriteColor();
+    void keypadWriteBlink();
 };
 
 

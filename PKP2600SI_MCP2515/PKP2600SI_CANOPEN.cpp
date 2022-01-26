@@ -523,3 +523,11 @@ void CANKeypad::setDefaultButtonStates(uint8_t defaultStates[12])
     buttonState[i]=defaultStates[i];
   }
 }
+
+void CANKeypad::updateKeypad()
+{
+  keypadWriteColor();
+  keypadWriteBlink();
+  sendKeysStatus();
+}
+

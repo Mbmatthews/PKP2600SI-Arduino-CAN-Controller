@@ -86,7 +86,7 @@ void loop() {
    lastKey9State = keypad.buttonState[PKP_KEY_9];
    if(lastKey9State==1 && (currentMillis-key9OnTime)>2000){
     keypad.buttonState[PKP_KEY_9]=0;
-    keypad.keypadWriteColor();
+    keypad.updateKeypad();
    }
    
 
